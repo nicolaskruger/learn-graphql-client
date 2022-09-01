@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 
 const GET_POSTS = gql`
-  {
+  query getPosts {
     posts {
       id
       text
@@ -59,12 +59,18 @@ const Home: NextPage = () => {
     event.stopPropagation()
     event.preventDefault()
     
-    createPost({variables: {type: text}})
-    
+    createPost({
+      variables: {type: text}, 
+      refetchQueries: [GET_POSTS]
+    })
+
   }
 
   const deletePost = (id: string) => {
-    delPost({variables: {type: id}})
+    delPost({
+      variables: {type: id},
+      refetchQueries: [GET_POSTS]
+    })
   }
 
   if(loading) return <div>loading...</div>;
