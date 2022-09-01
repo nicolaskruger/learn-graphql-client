@@ -1,11 +1,43 @@
+import { gql, useMutation, useQuery } from '@apollo/client'
 import type { NextPage } from 'next'
-import { FormEvent, useState } from 'react'
-import { v4 } from 'uuid'
+import { FormEvent, useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
+
+const GET_POSTS = gql`
+  {
+    posts {
+      id
+      text
+    }
+  }
+`
+
+const CREATE_POST = gql`
+  mutation createPost($type: String){
+    createPost(text: $type){
+      id,
+      text
+    }
+  }
+`
+
+const DELETE_POST = gql`
+  mutation deletePost($type: String){
+  deletePost(id: $type){
+    id
+    text
+  }
+}
+`
+
 
 type Post = {
   id: string,
   text: string
+}
+
+type Data = {
+  posts: Post[]
 }
 
 const Home: NextPage = () => {
@@ -14,25 +46,32 @@ const Home: NextPage = () => {
 
   const [posts, setPosts] = useState<Post[]>([])
 
+  const { loading, error, data } = useQuery<Data>(GET_POSTS)
+
+  const [createPost] = useMutation(CREATE_POST)
+  const [delPost] = useMutation(DELETE_POST)
+
+  useEffect(() => {
+    
+  }, [])
+
   const handleSubmit = (event:FormEvent) => {
     event.stopPropagation()
     event.preventDefault()
-    const post: Post = {
-      id: v4(),
-      text
-    }
-    setPosts([
-      post,
-      ...posts
-    ])
+    
+    createPost({variables: {type: text}})
+    
   }
 
   const deletePost = (id: string) => {
-    
-    const newPosts = posts.filter(post => post.id != id)
-
-    setPosts(newPosts)
+    delPost({variables: {type: id}})
   }
+
+  if(loading) return <div>loading...</div>;
+
+  console.log(error)
+
+  if(error) return <div>error...</div>;
 
   return (
     <div className={styles.container}>
@@ -44,7 +83,7 @@ const Home: NextPage = () => {
       </form>
       <ul>
         {
-          posts.map(post => (
+          data?.posts.map(post => (
             <li key={post.id}>
               {post.text}
               <button onClick={()=>deletePost(post.id)}>
