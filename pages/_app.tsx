@@ -6,9 +6,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     uri: 'http://localhost:3333/graphql',
     cache: new InMemoryCache(),
   });
-  client.refetchQueries({
-    include: "all"
-  })
+  
   return (
     <ApolloProvider client={client}>
       <Component {...pageProps} />
